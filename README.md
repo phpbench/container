@@ -4,12 +4,15 @@ PHPBench Service Container
 [![Build Status](https://travis-ci.org/phpbench/container.svg?branch=master)](https://travis-ci.org/phpbench/container)
 [![StyleCI](https://styleci.io/repos/55606670/shield)](https://styleci.io/repos/55606670)
 
-This is a simple but powerful dependency injection container:
+This is a simple but powerful (of course its powerful) dependency injection container:
 
 - Extendable (a.k.a service providers);
 - Configurable;
 - Extensions provide default configuration;
 - Service tagging;
+
+This container was developed incidentally for PHPBench, and is not a very
+polished library, but I like it.
 
 Simple usage
 ------------
@@ -36,7 +39,7 @@ $container = new Container(
         'foo.bar' => 'my_new_value',
     ]
 );
-$container->init(); // required if you use the build() method.
+$container->init(); // will trigger loading of the extensions.
 ```
 
 ```php
