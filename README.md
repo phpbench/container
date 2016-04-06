@@ -2,7 +2,7 @@ PHPBench Service Container
 ==========================
 
 [![Build Status](https://travis-ci.org/phpbench/container.svg?branch=master)](https://travis-ci.org/phpbench/container)
-[![StyleCI](https://styleci.io/repos/<repo-id>/shield)](https://styleci.io/repos/<repo-id>)
+[![StyleCI](https://styleci.io/repos/55606670/shield)](https://styleci.io/repos/55606670)
 
 This is a simple but powerful dependency injection container:
 
