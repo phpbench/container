@@ -131,6 +131,32 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * It should merge parameters.
+     */
+    public function testMergeParameters()
+    {
+        $this->container->setParameter('foo', [ 'foo' => 'bar' ]);
+        $this->container->mergeParameter('foo', [ 'bar' => 'boo' ]);
+        $this->assertEquals([
+            'foo' => 'bar',
+            'bar' => 'boo'
+        ], $this->container->getParameter('foo'));
+    }
+
+    /**
+     * It should throw an exception when trying to merge a value into a non-array parameter.
+     *
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage scalar
+     */
+    public function testMergeParameterNonArray()
+    {
+        $this->container->setParameter('foo', 'bar');
+        $this->container->mergeParameter('foo', [ 'bar' => 'boo' ]);
+    }
+
+
+    /**
      * It should throw an exception if an extension class does not exist.
      *
      * @expectedException InvalidArgumentException

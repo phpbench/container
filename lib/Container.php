@@ -191,6 +191,23 @@ class Container implements ContainerInterface
         $this->config[$name] = $value;
     }
 
+    public function mergeParameter($name, array $values)
+    {
+        $actual = $this->getParameter($name);
+
+        if (!is_array($actual)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Cannot merge values on to a scalar parameter "%s"',
+                $name
+            ));
+        }
+
+        $this->setParameter($name, array_merge(
+            $actual,
+            $values
+        ));
+    }
+
     /**
      * Return the parameter with the given name.
      *
