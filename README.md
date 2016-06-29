@@ -4,12 +4,12 @@ PHPBench Service Container
 [![Build Status](https://travis-ci.org/phpbench/container.svg?branch=master)](https://travis-ci.org/phpbench/container)
 [![StyleCI](https://styleci.io/repos/55606670/shield)](https://styleci.io/repos/55606670)
 
-This is a simple but powerful (of course its powerful) dependency injection container:
+This is a simple but powerful dependency injection container:
 
 - Extendable (a.k.a service providers);
 - Configurable;
+- Taggable services;
 - Extensions provide default configuration;
-- Service tagging;
 
 This container was developed incidentally for PHPBench, and is not a very
 polished library, but I like it.
@@ -18,7 +18,7 @@ Simple usage
 ------------
 
 ```php
-$container = new Container();
+$container = Container::create();
 $container->register('foobar', function (Container $container) {
     return new \stdClass();
 });
@@ -39,7 +39,6 @@ $container = new Container(
         'foo.bar' => 'my_new_value',
     ]
 );
-$container->init(); // will trigger loading of the extensions.
 ```
 
 ```php
@@ -48,18 +47,25 @@ class MyExtension implements ExtensionInterface
     public function load(Container $container)
     {
         $container->register('my_service', function (Container $container) {
-            return new MyService(
+            $service = new MyService(
                 $container->getParameter('foo_bar'),
                 $container->get('some_other_service')
             );
+
+            // get all tagged services and add them to the instantiated object
+            foreach ($container->getServiceIdsForTag('my_tag') as $serviceId) {
+                $service->add($container->get($serviceId));
+            }
         });
 
         $container->register('tagged_service', function (Container $container) {
-            return new MyService(
+            $service = new MyService(
                 $container->getParameter('foo_bar'),
                 $container->get('some_other_service')
             );
-        }, [ 'tag' => []);
+
+            return $service;
+        }, [ 'my_tag' => [ 'attribute_1' => 'foo' ]); // optional tag attributes
     }
 
     /**
@@ -72,16 +78,6 @@ class MyExtension implements ExtensionInterface
         return [
             'foo_bar' => 'this is foo'
         ];
-    }
-
-    /**
-     * Build the container.
-     */
-    public function build(Container $container)
-    {
-        foreach ($container->getServiceIdsForTag() as $serviceId) {
-            $container->get('my_service')->add($container->get($serviceId));
-        }
     }
 }
 ```
