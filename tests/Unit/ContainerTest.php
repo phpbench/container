@@ -103,7 +103,6 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
             __NAMESPACE__ . '\\TestExtension',
         ]);
 
-        $container->init();
         $object = $container->get('foobar');
         $this->assertInstanceOf('stdClass', $object);
         $this->assertEquals('bar', $object->foobar);
@@ -124,7 +123,6 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
             ]
         );
 
-        $container->init();
         $object = $container->get('foobar');
         $this->assertInstanceOf('stdClass', $object);
         $this->assertEquals('bazz', $object->foobar);
@@ -165,7 +163,6 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     public function testRegisterNotExistingExtension()
     {
         $container = new Container(['NotExistingExtension']);
-        $container->init();
     }
 
     /**
@@ -178,7 +175,6 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     public function testRegisterNotImplementingExtension()
     {
         $container = new Container(['stdClass']);
-        $container->init();
     }
 
     /**
@@ -192,7 +188,6 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $container = new Container([], [
             'not' => 'existing',
         ]);
-        $container->init();
     }
 
     /**

@@ -32,70 +32,7 @@ class Container implements ContainerInterface
     {
         $this->extensionClasses = $extensionClasses;
         $this->userConfig = $userConfig;
-    }
-
-    /**
-     * Configure the container. This method will call the `configure()` method
-     * on each extension. Extensions must use this opportunity to register their
-     * services and define any default config.
-     *
-     * This method must be called before `build()`.
-     */
-    public function init()
-    {
-        $extensions = [];
-
-        if (empty($this->extensionClasses) && empty($this->userConfig)) {
-            return;
-        }
-
-        foreach ($this->extensionClasses as $extensionClass) {
-            if (!class_exists($extensionClass)) {
-                throw new \InvalidArgumentException(sprintf(
-                    'Extension class "%s" does not exist',
-                    $extensionClass
-                ));
-            }
-
-            $extension = new $extensionClass();
-
-            if (!$extension instanceof ExtensionInterface) {
-                throw new \InvalidArgumentException(sprintf(
-                    // add any manually specified extensions
-                    'Extension "%s" must implement the PhpBench\\Extension interface',
-                    get_class($extension)
-                ));
-            }
-
-            $extensions[] = $extension;
-
-            $this->config = array_merge(
-                $this->config,
-                $extension->getDefaultConfig()
-            );
-        }
-
-        $diff = array_diff(array_keys($this->userConfig), array_keys($this->config));
-
-        if ($diff) {
-            throw new \InvalidArgumentException(sprintf(
-                'Unknown configuration keys: "%s". Permitted keys: "%s"',
-                implode('", "', $diff), implode('", "', array_keys($this->config))
-            ));
-        }
-
-        $this->config = array_merge(
-            $this->config,
-            $this->userConfig
-        );
-
-        foreach ($extensions as $extension) {
-            $extension->load($this);
-        }
-
-        foreach ($extensions as $extension) {
-            $extension->build($this);
-        }
+        $this->init();
     }
 
     /**
@@ -239,5 +176,62 @@ class Container implements ContainerInterface
     public function hasParameter($name)
     {
         return array_key_exists($name, $this->config);
+    }
+
+    private function init()
+    {
+        $extensions = [];
+
+        if (empty($this->extensionClasses) && empty($this->userConfig)) {
+            return;
+        }
+
+        foreach ($this->extensionClasses as $extensionClass) {
+            if (!class_exists($extensionClass)) {
+                throw new \InvalidArgumentException(sprintf(
+                    'Extension class "%s" does not exist',
+                    $extensionClass
+                ));
+            }
+
+            $extension = new $extensionClass();
+
+            if (!$extension instanceof ExtensionInterface) {
+                throw new \InvalidArgumentException(sprintf(
+                    // add any manually specified extensions
+                    'Extension "%s" must implement the PhpBench\\Extension interface',
+                    get_class($extension)
+                ));
+            }
+
+            $extensions[] = $extension;
+
+            $this->config = array_merge(
+                $this->config,
+                $extension->getDefaultConfig()
+            );
+        }
+
+        $diff = array_diff(array_keys($this->userConfig), array_keys($this->config));
+
+        if ($diff) {
+            throw new \InvalidArgumentException(sprintf(
+                'Unknown configuration keys: "%s". Permitted keys: "%s"',
+                implode('", "', $diff), implode('", "', array_keys($this->config))
+            ));
+        }
+
+        $this->config = array_merge(
+            $this->config,
+            $this->userConfig
+        );
+
+        foreach ($extensions as $extension) {
+            $extension->load($this);
+        }
+
+        foreach ($extensions as $extension) {
+            $extension->build($this);
+        }
     }
 }
