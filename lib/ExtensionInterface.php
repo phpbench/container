@@ -26,11 +26,4 @@ interface ExtensionInterface
      * @return array
      */
     public function getDefaultConfig();
-
-    /**
-     * Called after all services in all extensions have been registered.
-     *
-     * @param Container $container
-     */
-    public function build(Container $container);
 }

@@ -92,10 +92,6 @@ class Container implements ContainerInterface
         foreach ($extensions as $extension) {
             $extension->load($this);
         }
-
-        foreach ($extensions as $extension) {
-            $extension->build($this);
-        }
     }
 
     /**
