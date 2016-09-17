@@ -47,7 +47,7 @@ class MyExtension implements ExtensionInterface
                 $container->get('some_other_service')
             );
 
-            foreach ($container->getServiceIdsForTag() as $serviceId) {
+            foreach ($container->getServiceIdsForTag('tag') as $serviceId => $params) {
                 $service->add($container->get($serviceId));
             }
 
@@ -59,7 +59,7 @@ class MyExtension implements ExtensionInterface
                 $container->getParameter('foo_bar'),
                 $container->get('some_other_service')
             );
-        }, [ 'tag' => []);
+        }, [ 'tag' => [ 'param1' => 'foobar' ]);
     }
 
     /**
