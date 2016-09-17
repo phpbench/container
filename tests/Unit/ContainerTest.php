@@ -134,11 +134,11 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function testMergeParameters()
     {
-        $this->container->setParameter('foo', [ 'foo' => 'bar' ]);
-        $this->container->mergeParameter('foo', [ 'bar' => 'boo' ]);
+        $this->container->setParameter('foo', ['foo' => 'bar']);
+        $this->container->mergeParameter('foo', ['bar' => 'boo']);
         $this->assertEquals([
             'foo' => 'bar',
-            'bar' => 'boo'
+            'bar' => 'boo',
         ], $this->container->getParameter('foo'));
     }
 
@@ -151,9 +151,8 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     public function testMergeParameterNonArray()
     {
         $this->container->setParameter('foo', 'bar');
-        $this->container->mergeParameter('foo', [ 'bar' => 'boo' ]);
+        $this->container->mergeParameter('foo', ['bar' => 'boo']);
     }
-
 
     /**
      * It should throw an exception if an extension class does not exist.
