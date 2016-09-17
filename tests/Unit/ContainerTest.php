@@ -107,7 +107,6 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $object = $container->get('foobar');
         $this->assertInstanceOf('stdClass', $object);
         $this->assertEquals('bar', $object->foobar);
-        $this->assertEquals('barfoo', $object->setOnBuild);
     }
 
     /**
@@ -225,10 +224,5 @@ class TestExtension implements ExtensionInterface
 
             return $stdClass;
         });
-    }
-
-    public function build(Container $container)
-    {
-        $container->get('foobar')->setOnBuild = 'barfoo';
     }
 }

@@ -4,15 +4,9 @@ PHPBench Service Container
 [![Build Status](https://travis-ci.org/phpbench/container.svg?branch=master)](https://travis-ci.org/phpbench/container)
 [![StyleCI](https://styleci.io/repos/55606670/shield)](https://styleci.io/repos/55606670)
 
-This is a simple but powerful (of course its powerful) dependency injection container:
-
-- Extendable (a.k.a service providers);
-- Configurable;
-- Extensions provide default configuration;
-- Service tagging;
-
-This container was developed incidentally for PHPBench, and is not a very
-polished library, but I like it.
+Simple, extensible dependency injection container with parameters and service
+tagging. Implements [container
+interop](https://github.com/container-interop/container-interop).
 
 Simple usage
 ------------
@@ -24,8 +18,8 @@ $container->register('foobar', function (Container $container) {
 });
 ```
 
-Extending
----------
+Extending and Tagging
+---------------------
 
 Extension classes should be passed as the first argument to the container (the
 user configuration is the second argumnet).
@@ -48,10 +42,16 @@ class MyExtension implements ExtensionInterface
     public function load(Container $container)
     {
         $container->register('my_service', function (Container $container) {
-            return new MyService(
+            $service = new MyService(
                 $container->getParameter('foo_bar'),
                 $container->get('some_other_service')
             );
+
+            foreach ($container->getServiceIdsForTag() as $serviceId) {
+                $service->add($container->get($serviceId));
+            }
+
+            return $service;
         });
 
         $container->register('tagged_service', function (Container $container) {
@@ -73,22 +73,5 @@ class MyExtension implements ExtensionInterface
             'foo_bar' => 'this is foo'
         ];
     }
-
-    /**
-     * Build the container.
-     */
-    public function build(Container $container)
-    {
-        foreach ($container->getServiceIdsForTag() as $serviceId) {
-            $container->get('my_service')->add($container->get($serviceId));
-        }
-    }
 }
 ```
-
-Tagging
--------
-
-You can use tags (as in the above example) to collect services from extensions
-and do things with them, but be aware that this will cause all of the involved
-classes to be instantaited. Which is not very efficient.
