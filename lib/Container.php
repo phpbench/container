@@ -225,6 +225,11 @@ class Container implements ContainerInterface
         return $this->config[$name];
     }
 
+    public function getParameters()
+    {
+        return $this->config;
+    }
+
     /**
      * Return true if the named parameter exists.
      *
