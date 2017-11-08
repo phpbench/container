@@ -13,8 +13,9 @@ namespace PhpBench\Tests\Unit\DependencyInjection;
 
 use PhpBench\DependencyInjection\Container;
 use PhpBench\DependencyInjection\ExtensionInterface;
+use PHPUnit\Framework\TestCase;
 
-class ContainerTest extends \PHPUnit_Framework_TestCase
+class ContainerTest extends TestCase
 {
     private $container;
 
