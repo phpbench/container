@@ -11,7 +11,7 @@
 
 namespace PhpBench\DependencyInjection;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 
 /**
  * PHPBench Container.
