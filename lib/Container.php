@@ -141,7 +141,7 @@ class Container implements ContainerInterface
      *
      * @param string $tag
      *
-     * @return string[][]
+     * @return array<string,array<string,mixed>>
      */
     public function getServiceIdsForTag($tag)
     {
@@ -163,7 +163,7 @@ class Container implements ContainerInterface
      *
      * @param string $serviceId
      * @param \Closure $instantiator
-     * @param string[][] $tags
+     * @param array<string, array<string,mixed>> $tags
      */
     public function register($serviceId, \Closure $instantiator, array $tags = [])
     {
