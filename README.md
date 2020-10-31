@@ -2,7 +2,6 @@ PHPBench Service Container
 ==========================
 
 [![Build Status](https://travis-ci.org/phpbench/container.svg?branch=master)](https://travis-ci.org/phpbench/container)
-[![StyleCI](https://styleci.io/repos/55606670/shield)](https://styleci.io/repos/55606670)
 
 Simple, extensible dependency injection container with parameters and service
 tagging. Implements [container
