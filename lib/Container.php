@@ -11,7 +11,10 @@
 
 namespace PhpBench\DependencyInjection;
 
+use Closure;
 use Psr\Container\ContainerInterface;
+use Symfony\Component\OptionsResolver\Exception\ExceptionInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * PHPBench Container.
@@ -20,18 +23,39 @@ use Psr\Container\ContainerInterface;
  */
 class Container implements ContainerInterface
 {
+    /**
+     * @var array<string,Callable>
+     */
     private $instantiators = [];
-    private $services = [];
-    private $tags = [];
-    private $config = [];
-    private $userConfig = [];
 
+    /**
+     * @var array<string, mixed>
+     */
+    private $services = [];
+
+    /**
+     * @var array<string,array<string,mixed>>
+     */
+    private $tags = [];
+
+    /**
+     * @var array<string,mixed>
+     */
+    private $config = [];
+
+    /**
+     * @var array<string>
+     */
     private $extensionClasses = [];
 
-    public function __construct(array $extensionClasses = [], array $userConfig = [])
+    /**
+     * @param array<string,mixed> $config
+     * @param array<string> $extensionClasses
+     */
+    public function __construct(array $extensionClasses = [], array $config = [])
     {
         $this->extensionClasses = $extensionClasses;
-        $this->userConfig = $userConfig;
+        $this->config = $config;
     }
 
     /**
@@ -41,11 +65,13 @@ class Container implements ContainerInterface
      *
      * This method must be called before `build()`.
      */
-    public function init()
+    public function init(): void
     {
+        $resolver = new OptionsResolver();
         $extensions = [];
+        $config = [];
 
-        if (empty($this->extensionClasses) && empty($this->userConfig)) {
+        if (empty($this->extensionClasses) && empty($this->config)) {
             return;
         }
 
@@ -68,26 +94,27 @@ class Container implements ContainerInterface
             }
 
             $extensions[] = $extension;
-
-            $this->config = array_merge(
-                $this->config,
-                $extension->getDefaultConfig()
-            );
+            $extension->configure($resolver);
         }
 
-        $diff = array_diff(array_keys($this->userConfig), array_keys($this->config));
+        $diff = array_diff(array_keys($this->config), array_keys($this->config));
 
         if ($diff) {
             throw new \InvalidArgumentException(sprintf(
                 'Unknown configuration keys: "%s". Permitted keys: "%s"',
-                implode('", "', $diff), implode('", "', array_keys($this->config))
+                implode('", "', $diff),
+                implode('", "', array_keys($this->config))
             ));
         }
 
-        $this->config = array_merge(
-            $this->config,
-            $this->userConfig
-        );
+        try {
+            $this->config = $resolver->resolve($this->config);
+        } catch (ExceptionInterface $resolverException) {
+            throw new InvalidConfigurationException(sprintf(
+                'Invalid user configuration: %s',
+                $resolverException->getMessage()
+            ), 0, $resolverException);
+        }
 
         foreach ($extensions as $extension) {
             $extension->load($this);
@@ -99,8 +126,6 @@ class Container implements ContainerInterface
      * Note that this method will return the same instance on subsequent calls.
      *
      * @param string $serviceId
-     *
-     * @return mixed
      */
     public function get($serviceId)
     {
@@ -120,7 +145,10 @@ class Container implements ContainerInterface
         return $this->services[$serviceId];
     }
 
-    public function has($serviceId)
+    /**
+     * @param string $serviceId
+     */
+    public function has($serviceId): bool
     {
         return isset($this->instantiators[$serviceId]);
     }
@@ -128,10 +156,9 @@ class Container implements ContainerInterface
     /**
      * Set a service instance.
      *
-     * @param string $serviceId
      * @param mixed $instance
      */
-    public function set($serviceId, $instance)
+    public function set(string $serviceId, $instance): void
     {
         $this->services[$serviceId] = $instance;
     }
@@ -139,11 +166,9 @@ class Container implements ContainerInterface
     /**
      * Return services IDs for the given tag.
      *
-     * @param string $tag
-     *
-     * @return string[][]
+     * @return array<string, array<string, mixed>>
      */
-    public function getServiceIdsForTag($tag)
+    public function getServiceIdsForTag(string $tag): array
     {
         $serviceIds = [];
         foreach ($this->tags as $serviceId => $tags) {
@@ -161,15 +186,15 @@ class Container implements ContainerInterface
      * The instantiator is a closure which accepts an instance of this container and
      * returns a new instance of the service class.
      *
-     * @param string $serviceId
-     * @param \Closure $instantiator
-     * @param string[][] $tags
+     * @param array<string, array<string, mixed>> $tags
      */
-    public function register($serviceId, \Closure $instantiator, array $tags = [])
+    public function register(string $serviceId, Closure $instantiator, array $tags = []): void
     {
         if (isset($this->instantiators[$serviceId])) {
             throw new \InvalidArgumentException(sprintf(
-                'Service with ID "%s" has already been registered', $serviceId));
+                'Service with ID "%s" has already been registered',
+                $serviceId
+            ));
         }
 
         $this->instantiators[$serviceId] = $instantiator;
@@ -179,15 +204,17 @@ class Container implements ContainerInterface
     /**
      * Set the value of the parameter with the given name.
      *
-     * @param string $name
      * @param mixed $value
      */
-    public function setParameter($name, $value)
+    public function setParameter(string $name, $value): void
     {
         $this->config[$name] = $value;
     }
 
-    public function mergeParameter($name, array $values)
+    /**
+     * @param array<mixed> $values
+     */
+    public function mergeParameter(string $name, array $values): void
     {
         $actual = $this->getParameter($name);
 
@@ -225,7 +252,10 @@ class Container implements ContainerInterface
         return $this->config[$name];
     }
 
-    public function getParameters()
+    /**
+     * @return array<mixed,mixed>
+     */
+    public function getParameters(): array
     {
         return $this->config;
     }

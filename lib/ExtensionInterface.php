@@ -11,6 +11,8 @@
 
 namespace PhpBench\DependencyInjection;
 
+use Symfony\Component\OptionsResolver\OptionsResolver;
+
 interface ExtensionInterface
 {
     /**
@@ -18,12 +20,10 @@ interface ExtensionInterface
      *
      * @param Container $container
      */
-    public function load(Container $container);
+    public function load(Container $container): void;
 
     /**
-     * Return the default parameters for the container.
-     *
-     * @return array
+     * Configure the parameters which can be accessed by the extension.
      */
-    public function getDefaultConfig();
+    public function configure(OptionsResolver $resolver): void;
 }

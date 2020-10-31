@@ -9,17 +9,20 @@
  * file that was distributed with this source code.
  */
 
-namespace PhpBench\Tests\Unit\DependencyInjection;
+namespace PhpBench\DependencyInjection\Tests\Unit;
 
+use InvalidArgumentException;
 use PhpBench\DependencyInjection\Container;
 use PhpBench\DependencyInjection\ExtensionInterface;
 use PHPUnit\Framework\TestCase;
+use PhpBench\DependencyInjection\InvalidConfigurationException;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ContainerTest extends TestCase
 {
     private $container;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->container = new Container();
     }
@@ -79,12 +82,11 @@ class ContainerTest extends TestCase
 
     /**
      * Its should throw an exception if a service is already registered.
-     *
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessge Service with ID "stdclass"
      */
     public function testServiceAlreadyRegistered()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Service with ID "stdclass"');
         $this->container->register('stdclass', function () {
             return new \stdClass();
         });
@@ -145,24 +147,24 @@ class ContainerTest extends TestCase
 
     /**
      * It should throw an exception when trying to merge a value into a non-array parameter.
-     *
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage scalar
      */
     public function testMergeParameterNonArray()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('scalar');
+
         $this->container->setParameter('foo', 'bar');
         $this->container->mergeParameter('foo', ['bar' => 'boo']);
     }
 
     /**
      * It should throw an exception if an extension class does not exist.
-     *
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage "NotExistingExtension" does not exist
      */
     public function testRegisterNotExistingExtension()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('"NotExistingExtension" does not exist');
+
         $container = new Container(['NotExistingExtension']);
         $container->init();
     }
@@ -170,24 +172,23 @@ class ContainerTest extends TestCase
     /**
      * It should throw an exception if an extension class does not implement
      * the ExtensionInterface.
-     *
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Extension "stdClass" must implement the
      */
     public function testRegisterNotImplementingExtension()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Extension "stdClass" must implement the');
+
         $container = new Container(['stdClass']);
         $container->init();
     }
 
     /**
      * It should throw an exception if an unknown user configuration key is used.
-     *
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Unknown configuration keys: "not". Permitted keys:
      */
     public function testUnknownUserConfig()
     {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('Invalid user configuration');
         $container = new Container([], [
             'not' => 'existing',
         ]);
@@ -196,12 +197,12 @@ class ContainerTest extends TestCase
 
     /**
      * It should throw an exception if a requested parameter does not exist.
-     *
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Parameter "foo" has not been registered
      */
     public function testUnknownParameter()
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Parameter "foo" has not been registered');
+
         $container = new Container();
         $container->getParameter('foo');
     }
@@ -209,14 +210,14 @@ class ContainerTest extends TestCase
 
 class TestExtension implements ExtensionInterface
 {
-    public function getDefaultConfig()
+    public function configure(OptionsResolver $resolver): void
     {
-        return [
+        $resolver->setDefaults([
             'foo' => 'bar',
-        ];
+        ]);
     }
 
-    public function load(Container $container)
+    public function load(Container $container): void
     {
         $container->register('foobar', function ($container) {
             $stdClass = new \stdClass();
