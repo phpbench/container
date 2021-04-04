@@ -271,4 +271,12 @@ class Container implements ContainerInterface
     {
         return array_key_exists($name, $this->config);
     }
+
+    /**
+     * @return class-string[]
+     */
+    public function getExtensionClasses(): array
+    {
+        return $this->extensionClasses;
+    }
 }

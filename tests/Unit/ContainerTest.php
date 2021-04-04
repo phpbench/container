@@ -110,6 +110,9 @@ class ContainerTest extends TestCase
         $object = $container->get('foobar');
         $this->assertInstanceOf('stdClass', $object);
         $this->assertEquals('bar', $object->foobar);
+        $this->assertEquals([
+            __NAMESPACE__ . '\\TestExtension',
+        ], $container->getExtensionClasses());;
     }
 
     /**
